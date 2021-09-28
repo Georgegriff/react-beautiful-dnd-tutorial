@@ -5,7 +5,7 @@ import { Draggable } from "react-beautiful-dnd";
 
 interface ContainerProps {
   readonly isDragging: boolean;
-  readonly disabled: boolean;
+  readonly disabled?: boolean;
 }
 
 const Container = styled.div<ContainerProps>`
@@ -21,7 +21,7 @@ const Container = styled.div<ContainerProps>`
 `;
 
 interface HandleProps {
-  readonly disabled: boolean;
+  readonly disabled?: boolean;
 }
 
 const Handle = styled.div<HandleProps>`
@@ -45,27 +45,22 @@ interface ITaskProps {
   index: number;
 }
 
-export const Task: React.FC<ITaskProps> = ({ task, index }) => {
-  const isDragDisabled = task.id === "task-1";
+export const Task: React.FC<ITaskProps> = React.memo(({ task, index }) => {
+  console.log("render called", task.id);
   return (
-    <Draggable
-      draggableId={task.id}
-      index={index}
-      isDragDisabled={isDragDisabled}
-    >
+    <Draggable draggableId={task.id} index={index}>
       {(provided, snapshot) => {
         return (
           <Container
             ref={provided.innerRef}
             {...provided.draggableProps}
             isDragging={snapshot.isDragging}
-            disabled={isDragDisabled}
           >
-            <Handle disabled={isDragDisabled} {...provided.dragHandleProps} />
+            <Handle {...provided.dragHandleProps} />
             {task.content}
           </Container>
         );
       }}
     </Draggable>
   );
-};
+});

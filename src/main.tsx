@@ -1,11 +1,12 @@
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import { Column } from "./Column";
-import { ColumnData, initialData } from "./initial-data";
+import { ColumnData, initialData, Task as ITask } from "./initial-data";
 import {
   DragDropContext,
   DragStart,
   DragUpdate,
+  Droppable,
   DropResult,
   ResponderProvided,
 } from "react-beautiful-dnd";
@@ -16,10 +17,35 @@ const Container = styled.div`
   display: flex;
   flex-wrap: wrap;
   & > * {
-    flex: 1;
-    min-width: 250px;
+    width: 250px;
   }
 `;
+
+interface InnerListProps {
+  taskMap: Record<string, ITask>;
+  index: number;
+  column: ColumnData;
+}
+
+const InnerList: React.FC<InnerListProps> = React.memo(
+  ({ column, taskMap, index }) => {
+    const tasks = column.taskIds.map((taskId) => {
+      return taskMap[taskId];
+    });
+    // prevent moving backwards
+    return (
+      <Column index={index} key={column.id} column={column} tasks={tasks} />
+    );
+  }
+);
+
+// const InnerList: React.FC<InnerListProps> = ({ column, taskMap, index }) => {
+//   const tasks = column.taskIds.map((taskId) => {
+//     return taskMap[taskId];
+//   });
+//   // prevent moving backwards
+//   return <Column index={index} key={column.id} column={column} tasks={tasks} />;
+// };
 
 const App = () => {
   const [taskData, setTaskData] = useState(initialData);
@@ -47,7 +73,7 @@ const App = () => {
       //    document.body.style.color = "initial";
       //    document.body.style.backgroundColor = "initial";
       setHomeIndex(null);
-      const { destination, source, draggableId } = result;
+      const { destination, source, draggableId, type } = result;
 
       // dropped outside
       if (!destination) {
@@ -59,6 +85,17 @@ const App = () => {
         destination.droppableId === source.droppableId &&
         destination.index === source.index
       ) {
+        return;
+      }
+
+      if (type === "column") {
+        const newColumnOrder = Array.from(taskData.columnOrder);
+        newColumnOrder.splice(source.index, 1);
+        newColumnOrder.splice(destination.index, 0, draggableId);
+        setTaskData({
+          ...taskData,
+          columnOrder: newColumnOrder,
+        });
         return;
       }
 
@@ -125,24 +162,24 @@ const App = () => {
       // onDragUpdate={onDragUpdate}
       onDragEnd={onDragEnd}
     >
-      <Container>
-        {taskData.columnOrder.map((columnId, index) => {
-          const column = taskData.columns[columnId];
-          const tasks = column.taskIds.map((taskId) => {
-            return taskData.tasks[taskId];
-          });
-          // prevent moving backwards
-          const isDropDisabled = homeIndex ? index < homeIndex : false;
-          return (
-            <Column
-              isDropDisabled={isDropDisabled}
-              key={column.id}
-              column={column}
-              tasks={tasks}
-            />
-          );
-        })}
-      </Container>
+      <Droppable droppableId="all-columns" direction="horizontal" type="column">
+        {(provided) => (
+          <Container ref={provided.innerRef} {...provided.droppableProps}>
+            {taskData.columnOrder.map((columnId, index) => {
+              const column = taskData.columns[columnId];
+              return (
+                <InnerList
+                  key={columnId}
+                  column={column}
+                  taskMap={taskData.tasks}
+                  index={index}
+                />
+              );
+            })}
+            {provided.placeholder}
+          </Container>
+        )}
+      </Droppable>
     </DragDropContext>
   );
 };

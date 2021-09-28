@@ -51,13 +51,22 @@ const App = () => {
   const [taskData, setTaskData] = useState(initialData);
   const [homeIndex, setHomeIndex] = useState<number | null>(null);
 
-  const onDragStart = useCallback((start: DragStart) => {
-    const newHomeIndex = taskData.columnOrder.indexOf(start.source.droppableId);
-    // document.body.style.color = "orange";
-    // document.body.style.transition = "background-color 0.2s ease";
+  const onDragStart = useCallback(
+    (start: DragStart, provided: ResponderProvided) => {
+      const { announce } = provided;
+      announce(
+        `You have lifted the task in position ${start.source.index + 1}, bro.`
+      );
+      const newHomeIndex = taskData.columnOrder.indexOf(
+        start.source.droppableId
+      );
+      // document.body.style.color = "orange";
+      // document.body.style.transition = "background-color 0.2s ease";
 
-    setHomeIndex(newHomeIndex);
-  }, []);
+      setHomeIndex(newHomeIndex);
+    },
+    []
+  );
 
   // const onDragUpdate = useCallback((update: DragUpdate) => {
   //   const { destination } = update;

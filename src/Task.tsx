@@ -56,7 +56,10 @@ export const Task: React.FC<ITaskProps> = React.memo(({ task, index }) => {
             {...provided.draggableProps}
             isDragging={snapshot.isDragging}
           >
-            <Handle {...provided.dragHandleProps} />
+            <Handle
+              {...provided.dragHandleProps}
+              aria-roledescription="Press space bar to lift the task bro"
+            />
             {task.content}
           </Container>
         );

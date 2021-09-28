@@ -15,10 +15,6 @@ import "@atlaskit/css-reset";
 const Container = styled.div`
   display: flex;
   flex-wrap: wrap;
-  & > * {
-    flex: 1;
-    min-width: 250px;
-  }
 `;
 
 const App = () => {

@@ -23,8 +23,7 @@ const TaskList = styled.div<TaskListProps>`
   padding: 8px;
   transition: background-color 0.2s ease;
   background: ${({ isDraggingOver }) => (isDraggingOver ? "skyblue" : "white")};
-  flex-grow: 1;
-  min-height: 100px;
+  display: flex;
 `;
 
 interface IColumnProps {
@@ -42,6 +41,7 @@ export const Column: React.FC<IColumnProps> = ({
     <Container>
       <Title>{column.title}</Title>
       <Droppable
+        direction="horizontal"
         droppableId={column.id}
         // type={column.id === "column-3" ? "done" : "active"}
         isDropDisabled={isDropDisabled}
